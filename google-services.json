@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "80976789921",
+    "project_id": "babillard-4dbc8",
+    "storage_bucket": "babillard-4dbc8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:80976789921:android:f375813fd13ff8e150cbe0",
+        "android_client_info": {
+          "package_name": "com.example.babillard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgagzrUIUkG44-IV9Y81xk8HAHTCoF52s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
