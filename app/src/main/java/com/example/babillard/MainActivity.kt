@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -100,6 +101,7 @@ class MainActivity : ComponentActivity() {
                         composable("screen1") { Screen1(navController) }
                         composable("screen2") { Screen2() }
 
+                        composable("LoginScreen") {LoginScreen(navController, Firebase.auth) }
                         composable("Screen") { Screen(navController) }
                         composable("ConnexionScreen") { ConnexionScreen(navController) }
                         composable("EcolesScreen") { EcolesScreen(navController) }
@@ -164,7 +166,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginScreen(auth: FirebaseAuth) {
+fun LoginScreen( navController: NavHostController, auth: FirebaseAuth) {
 
     val context = LocalContext.current
 
@@ -202,17 +204,25 @@ fun LoginScreen(auth: FirebaseAuth) {
             fontWeight = FontWeight.Bold,
             fontStyle = FontStyle.Italic,
             fontSize = 20.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
+            color = Color.Red,
+            modifier = Modifier.padding(top = 20.dp, bottom = 16.dp)
         )
 
         Image(
-            painter = painterResource(id = R.drawable.iuc),
+            painter = painterResource(id = R.drawable.iuciuciuc),
             contentDescription = "Logo",
-            modifier = Modifier.size(150.dp)
+            modifier = Modifier.size(250.dp)
         )
 
         Text(
-            text = "...Enseigner l'homme dans sa globalité",
+            text = "...Enseigner l'homme dans sa",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Text(
+            text = "globalité",
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             fontStyle = FontStyle.Italic,
@@ -275,6 +285,7 @@ fun LoginScreen(auth: FirebaseAuth) {
                     isError = !isPasswordValid
 
                 )
+
                 Button(
                     onClick = {
                         auth.signInWithEmailAndPassword(email, password)
@@ -282,9 +293,19 @@ fun LoginScreen(auth: FirebaseAuth) {
                                 if (it.isSuccessful){
                                     Toast.makeText(context, "Vous avez été connecté avec succès", Toast.LENGTH_SHORT).show()
                                     Log.d(TAB, "Vous avez été connecté avec succès")
+                                    ////////////////////////////////////////////////////////////////////
+                                    navController.navigate("EcolesScreen")
+                                    ////////////////////////////////////////////////////////////////////
+
                                 }else{
                                     Toast.makeText(context, "Email ou mot de passe incorrect", Toast.LENGTH_SHORT).show()
                                     Log.d(TAB, "Email ou mot de passe incorrect")
+                                    ////////////////////////////////////////////////////////////////////
+                                    /*
+                                        navController.navigate("EcolesScreen")
+                                    */
+                                    ////////////////////////////////////////////////////////////////////
+
                                 }
                             }
                     },
@@ -316,7 +337,8 @@ fun LoginScreen(auth: FirebaseAuth) {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    LoginScreen(Firebase.auth)
+    val navController = rememberNavController()
+    LoginScreen(navController, Firebase.auth)
 }
 
 /*@Preview(showBackground = true)

@@ -45,7 +45,7 @@ fun Screen( navController: NavHostController ){
         delay(4000)
 
         /////////////////////////////////////// Ouverture du formulaire Ecoles //////////////////
-        navController.navigate("ConnexionScreen")
+        navController.navigate("LoginScreen")
 
     }
     SplashScreen_Content(alpha = alphaAnim.value)

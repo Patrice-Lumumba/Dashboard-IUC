@@ -29,6 +29,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -47,6 +48,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.babillard.MainActivity
 import com.example.babillard.R
+import com.example.babillard.SplashScreen.Connexion.Ecoles.Ecoles_Card
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.InternalCoroutinesApi
 import java.io.File
 import java.text.SimpleDateFormat
@@ -63,10 +68,10 @@ fun ConnexionScreen( navController: NavHostController){
         Connexion_Content(scrollState)
     }
     Scaffold(scaffoldState = rememberScaffoldState(),
-        topBar = { Connexion_Headline(navController) },
+        topBar = { /*Connexion_Headline(navController)*/ },
         drawerContent = {},
-        content = { Connexion_Card(navController) },
-        bottomBar = { Connexion_Footer(navController) }
+        content = { Connexion_Card(Firebase.auth) },
+        bottomBar = { /*Connexion_Footer(navController)*/ }
     )
 }
 /////////////////////// Terminé ////////////////////////////////
@@ -163,139 +168,152 @@ fun Connexion_Footer ( navController: NavHostController) {
 
 //////////////////////////// Corps de la page /////////////////
 @Composable
-fun Connexion_Card(navController: NavHostController) {
+fun Connexion_Card( auth: FirebaseAuth) {
 
-    ///////////////// Scroll Horizontal ///////////////
-    LazyColumn {
+    val context = LocalContext.current
 
-        /////////////// Logo centré //////////////////////
-        item{
+    val focusManager = LocalFocusManager.current
+
+    var email by remember {
+        mutableStateOf("")
+    }
+
+    var password by remember {
+        mutableStateOf("")
+    }
+
+    val isEmailValid by derivedStateOf {
+        Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    val isPasswordValid by derivedStateOf {
+        password.length > 7
+    }
+
+    var isPasswordVisible by remember {
+        mutableStateOf(false)
+    }
+
+    Column(
+        modifier = Modifier
+            .background(color = Color.LightGray)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ){
+        Text(
+            text = "IUC",
+            fontWeight = FontWeight.Bold,
+            fontStyle = FontStyle.Italic,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Image(
+            painter = painterResource(id = R.drawable.iuciuciuc),
+            contentDescription = "Logo",
+            modifier = Modifier.size(150.dp)
+        )
+
+        Text(
+            text = "   ...Enseigner l'homme dans sa globalité",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color.Black)
+        ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .height(350.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.iuc),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(300.dp)
-                        .padding(start = 1.dp)
-                        .width(1.dp)
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(all = 10.dp)
+            ){
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text( "Votre Email")},
+                    placeholder = { Text("nom.prenom@myiuc.com")},
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {focusManager.moveFocus(FocusDirection.Down)}
+                    ),
+                    isError = !isEmailValid,
+                    trailingIcon = {
+                        if(email.isNotBlank()){
+                            IconButton(onClick = {email = ""}) {
+                                Icon(
+                                    imageVector = Icons.Filled.Clear,
+                                    contentDescription = "Clear mail"
+                                )
+                            }
+                        }
+                    }
                 )
-            }
-        }
 
-        /////////////// Champ 1  ///////////////////
-        item{
-            Box(
-                contentAlignment = Alignment.CenterStart,
-                modifier = Modifier.fillMaxWidth(),
-            ){
-                LazyRow {
-                    /////////////////////// Premier détail //////////////////////
-                    items(1){
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp, top = 8.dp),
-                            //verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column {
-                                Row{
-                                    //var textValue by remember { mutableStateOf("Bonjour") }
-                                    TextField(
-                                        value = "Dongmo Laurent",
-                                        onValueChange = { /*textValue = it"*/ },
-                                        label = { Text("Entrez votre nom : ") },
-                                        keyboardOptions = KeyboardOptions(
-                                            keyboardType = KeyboardType.Uri, // Indique que le champ accepte un chemin d'accès
-                                            imeAction = ImeAction.Done,
-                                        ),
-                                        modifier = Modifier
-                                            .width(325.dp)
-                                            .background(Color.White)
-                                    )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text( "Matricule")},
+                    placeholder = { Text("")},
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {focusManager.clearFocus()}
+                    ),
+                    isError = !isPasswordValid
+
+                )
+                Button(
+                    onClick = {
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener{
+                                if (it.isSuccessful){
+                                    Toast.makeText(context, "Vous avez été connecté avec succès", Toast.LENGTH_SHORT).show()
+                                    Log.d(MainActivity.TAB, "Vous avez été connecté avec succès")
+                                }else{
+                                    Toast.makeText(context, "Email ou mot de passe incorrect", Toast.LENGTH_SHORT).show()
+                                    Log.d(MainActivity.TAB, "Email ou mot de passe incorrect")
                                 }
                             }
-                        }
-                    }
-                }
-            }
-        }
-
-        /////////////// Champ 2  ///////////////////
-        item{
-            Box(
-                contentAlignment = Alignment.CenterStart,
-                modifier = Modifier.fillMaxWidth(),
-            ){
-                LazyRow {
-                    /////////////////////// Premier détail //////////////////////
-                    items(1){
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp, top = 20.dp),
-                            //verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column {
-                                Row{
-                                    //var textValue by remember { mutableStateOf("Bonjour") }
-                                    TextField(
-                                        value = "IUC22E0066003",
-                                        onValueChange = { /*textValue = it"*/ },
-                                        label = { Text("Entrez votre matricule : ") },
-                                        keyboardOptions = KeyboardOptions(
-                                            keyboardType = KeyboardType.Uri, // Indique que le champ accepte un chemin d'accès
-                                            imeAction = ImeAction.Done,
-                                        ),
-                                        modifier = Modifier
-                                            .width(325.dp)
-                                            .background(Color.White)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /////////////// Bouton Enregistrer ////////////////
-        items(1){
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 1.dp, top = 30.dp),
-                //verticalAlignment = Alignment.CenterVertically,
-            ) {
-
-                FloatingActionButton(
-                    onClick = { navController.navigate( "EcolesScreen") },
-                    backgroundColor = Color.Red,
-                    contentColor = Color.White,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .fillMaxWidth()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
+                    enabled = isEmailValid && isPasswordValid
                 ) {
-                    Text(
-                        text = "        Connexion        ",
+                    /*Text(
+                        text = "Se connecter",
                         fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.body1.copy(
-                            fontSize = 22.sp
-                        )
-                    )
+                        color = Color.Black,
+                        fontSize = 16.dp
+                    )*/
                 }
 
             }
+        }
+        Row(
+            horizontalArrangement = Arrangement.End,
+            modifier = Modifier.fillMaxWidth()
+        ) {
 
         }
     }
 }
-
 /////////////////////////// Terminé ////////////////////////////////
 
 
@@ -319,20 +337,7 @@ private fun getImagesFromFolder(folderPath: String): List<File> {
 @Composable
 fun Connexion_Content(scaffoldState: LazyListState) {
     val navController = rememberNavController()
-    Connexion_Card(navController)
+    Connexion_Card(Firebase.auth)
 }
-////////////////////////////// Terminé ///////////////////////////////////
-
-companion object{
-    val TAB: String = MainActivity::class.java.simpleName
-}
-
-private val auth by lazy{
-    Firebase.auth
-}
-
-@InternalCoroutinesApi
-@ExperimentalMaterialApi
-
 
 
